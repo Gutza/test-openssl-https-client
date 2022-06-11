@@ -40,7 +40,6 @@ OPENSSL_FOLDER="$OPENSSL_ROOT/openssl-$OPENSSL_VERSION"
 }
 echo "ok"
 
-
 cd $OPENSSL_FOLDER || {
     echo "Successfully downloaded and unpacked the sources, but can't access folder $OPENSSL_FOLDER. Aborting." >&2
     exit 1
@@ -48,6 +47,7 @@ cd $OPENSSL_FOLDER || {
 echo "-----------------------------------------------------------"
 echo "Configuring the build, this might take a couple of minutes."
 echo "-----------------------------------------------------------"
+# Reference: https://wiki.openssl.org/index.php/Compilation_and_Installation#Using_RPATHs
 ./config -Wl,-rpath=$(pwd) -Wl,--enable-new-dtags || {
     echo "Something went wrong while configuring the build. Aborting." >&2
     exit 1
