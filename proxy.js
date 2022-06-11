@@ -6,10 +6,11 @@ const localPort = 8080;
 const remoteHost = "www.google.com";
 const remotePort = 443;
 
-const openssl_binary = '/mnt/m/MobileShare/Work/RBC/test-openssl-https-client/openssl/openssl-live/apps/openssl';
+const openssl_binary = process.env['WORKBENCH_OPENSSL_BIN'] ? process.env['WORKBENCH_OPENSSL_BIN'] : "openssl";
+
 const openssl_params = ['s_client', '-connect', `${remoteHost}:${remotePort}`, '-ign_eof'];
 // Uncomment this if you want mutual TLS
-// spawnParams.push(['-cert', 'my.crt', '-key', 'my.key']);
+// openssl_params.push('--cert', 'my.crt', '--key', 'my.key');
 
 exec(`${openssl_binary} version`, (error, stdout, stderr) => {
     if (error) {
@@ -71,7 +72,7 @@ server.on('connection', function(socket) {
     });
 
     socket.on('end', function() {
-        console.log('Closing connection with the client');
+        console.log(']]] Closing connection with the client.');
         childProcess.kill();
     });
 

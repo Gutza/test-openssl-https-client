@@ -22,14 +22,19 @@ variable `openssl_binary` to handle the TLS layer.
    **This is safe**, the script doesn't attempt to actually install the new version in your OS – it just downloads, configures, and builds
    the binary; it never even attemps to escalate privileges, and everything happens locally.
 
+   **IMPORTANT!** Despite my best efforts to properly handle paths with spaces in the shell script, I found it's impossible to build
+   some versions of openssl out of the box if your path contains spaces (I know for a fact this doesn't work for 1.1.1o, not sure about
+   other versions.) Caveat emptor.
+
    You can also supply magic word `github` instead of a valid version number; that will cause it to clone the `master` branch from
    https://github.com/openssl/openssl, and it will try to build that. You can even run that several times, and it will download the
    newest version every time (as opposed to providing a version number, which it refuses to re-download).
    Be advised this take ages – but that's life on the cutting edge.
    
-1. Assuming everything works out well, you'll get a confirmation message at the end of the script which includes the full path to the binary.
-   Use that path to replace the value of `openssl_binary` in `proxy.js`;
-1. (_Optional_) Confirm your new version is actually linked against the local libraries: compare the output of `ldd` when executed against
+1. Assuming everything works out well, you'll get a confirmation message at the end of the script which includes instructions on how to use
+   your new binary.
+
+1. (_Optional_) Confirm that your new binary is actually linked against the local libraries: compare the output of `ldd` when executed against
    your new binary versus the output of `ldd $(which openssl)`;
 1. Start the proxy: `node proxy.js`
 1. Visit [http://localhost:8080/](http://localhost:8080/)
@@ -48,7 +53,7 @@ You can of course use `curl`, `wget`, or any other thing which understands HTTP 
 
 ## Known limitations
 I implemented this as a one-off investigative tool, so there are tons of limitations:
-- you can't set up anything dynamically, or even at runtime (the path to the OpenSSL binary, the local port, remote host, and remote port are all hardcoded);
+- you can't set up anything dynamically, or even at runtime (the path to the local port, remote host, and remote port are all hardcoded);
 - the code is really poorly optimized and not robust enough (there are a few scenarios where the whole thing comes crashing down; I never had the time, nor the interest to investigate and fix that);
 - you can't bind to specific local interfaces or IP addresses;
 - connections are not handled elegantly at all – the proxy has extremely limited understanding of what it's doing, so it just keeps sockets laying around until something dies;

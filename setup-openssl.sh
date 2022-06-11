@@ -9,12 +9,12 @@ THIS=$(dirname $0)
 THIS=$(realpath $THIS)
 OPENSSL_VERSION="$1"
 OPENSSL_ROOT="$THIS/openssl"
-[ -d $OPENSSL_ROOT ] || mkdir $OPENSSL_ROOT || {
+[ -d "$OPENSSL_ROOT" ] || mkdir "$OPENSSL_ROOT" || {
     echo "Failed creating openssl root folder $OPENSSL_ROOT. Aborting." >&2
     exit 1
 }
 
-cd $OPENSSL_ROOT
+cd "$OPENSSL_ROOT"
 OPENSSL_FOLDER="$OPENSSL_ROOT/openssl-$OPENSSL_VERSION"
 "$OPENSSL_FOLDER/apps/openssl" version >/dev/null 2>&1 && {
     echo "OpenSSL $OPENSSL_VERSION seems to already exist in $OPENSSL_FOLDER. Aborting."
@@ -40,7 +40,7 @@ OPENSSL_FOLDER="$OPENSSL_ROOT/openssl-$OPENSSL_VERSION"
 }
 echo "ok"
 
-cd $OPENSSL_FOLDER || {
+cd "$OPENSSL_FOLDER" || {
     echo "Successfully downloaded and unpacked the sources, but can't access folder $OPENSSL_FOLDER. Aborting." >&2
     exit 1
 }
@@ -48,7 +48,7 @@ echo "-----------------------------------------------------------"
 echo "Configuring the build, this might take a couple of minutes."
 echo "-----------------------------------------------------------"
 # Reference: https://wiki.openssl.org/index.php/Compilation_and_Installation#Using_RPATHs
-./config -Wl,-rpath=$(pwd) -Wl,--enable-new-dtags || {
+./config -Wl,-rpath="$(pwd)" -Wl,--enable-new-dtags || {
     echo "Something went wrong while configuring the build. Aborting." >&2
     exit 1
 }
@@ -68,5 +68,6 @@ $OPENSSL_BINARY version || {
     echo "This is strange. Everything seemed fine, but there are errors. Aborting." >&2
     exit 1
 }
-echo "Successfully built openssl in $OPENSSL_BINARY"
-echo "You can now provide that path in proxy.js, in constant openssl_binary."
+
+echo "Successfully built openssl. You can use it in proxy.js by executing"
+echo "export WORKBENCH_OPENSSL_BIN=\"$OPENSSL_BINARY\""
