@@ -6,7 +6,7 @@ const localPort = 8080;
 const remoteHost = "www.google.com";
 const remotePort = 443;
 
-const openssl_binary = 'openssl';
+const openssl_binary = '/mnt/m/MobileShare/Work/RBC/test-openssl-https-client/openssl/openssl-live/apps/openssl';
 const openssl_params = ['s_client', '-connect', `${remoteHost}:${remotePort}`, '-ign_eof'];
 // Uncomment this if you want mutual TLS
 // spawnParams.push(['-cert', 'my.crt', '-key', 'my.key']);
@@ -35,7 +35,7 @@ server.on('connection', function(socket) {
     const childProcess = spawn(openssl_binary, openssl_params);
 
     childProcess.stdout.on('data', (data) => {
-        console.log(`SRV >>> ${data.length} bytes`);
+        console.log(`>>-- server -->> ${data.length} bytes`);
         if (!finishedOpensslHeader) {
             finishedOpensslHeader = data.toString().trimEnd().endsWith("---");
             if (finishedOpensslHeader) {
@@ -66,7 +66,7 @@ server.on('connection', function(socket) {
 
     socket.on('data', function(chunk) {
         chunk = chunk.toString().replace(`Host: localhost:${localPort}`, `Host: ${remoteHost}:${remotePort}`)
-        console.log(`<<< CLI ${chunk.toString().length} bytes`);
+        console.log(`<<-- client --<< ${chunk.toString().length} bytes`);
         childProcess.stdin.write(chunk);
     });
 

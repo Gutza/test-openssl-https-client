@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 
 [ -z "$1" ] && {
-    echo "Please provide the openssl version as the first parameter (just the version, e.g. 1.1.1f)." >&2
+    echo "Please provide the openssl version as the first parameter (just the version, e.g. 1.1.1f)."
+    echo "Alternately, provide magic word github to download the live master branch and try to build that instead."
     exit 1
 }
 THIS=$(dirname $0)
@@ -15,16 +16,27 @@ OPENSSL_ROOT="$THIS/openssl"
 
 cd $OPENSSL_ROOT
 OPENSSL_FOLDER="$OPENSSL_ROOT/openssl-$OPENSSL_VERSION"
-[ -d "$OPENSSL_FOLDER" ] && {
+"$OPENSSL_FOLDER/apps/openssl" version >/dev/null 2>&1 && {
     echo "OpenSSL $OPENSSL_VERSION seems to already exist in $OPENSSL_FOLDER. Aborting."
-    exit 1
+    echo "Delete folder $OPENSSL_FOLDER (or at least the binary at $OPENSSL_FOLDER/apps/openssl) if you want to force a rebuild."
+    exit
 }
 
-echo -n "Downloading the sources... "
-curl --location -sl https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz | tar zx || {
-    echo "failed"
-    echo "Failed downloading the sources. Aborting." >&2
-    exit 1
+[ "github" = "$OPENSSL_VERSION" ] && {
+    echo -n "Downloading the sources from GitHub... "
+    OPENSSL_FOLDER="$OPENSSL_ROOT/openssl-live"
+    git clone -q --depth 1 git://git.openssl.org/openssl.git "$OPENSSL_FOLDER" || {
+        echo "failed!"
+        echo "Failed downloading the sources from GitHub! Aborting." >&2
+        exit 1
+    }
+} || {
+    echo -n "Downloading sources from openssl.org... "
+    curl --location -sl https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz | tar zx || {
+        echo "failed"
+        echo "Failed downloading the sources. Aborting." >&2
+        exit 1
+    }
 }
 echo "ok"
 
@@ -56,5 +68,5 @@ $OPENSSL_BINARY version || {
     echo "This is strange. Everything seemed fine, but there are errors. Aborting." >&2
     exit 1
 }
-echo "Successfully built openssl $OPENSSL_VERSION in $OPENSSL_BINARY"
-echo "You can now use that path in proxy.js constant \$openssl_binary."
+echo "Successfully built openssl in $OPENSSL_BINARY"
+echo "You can now provide that path in proxy.js, in constant openssl_binary."
